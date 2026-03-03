@@ -10,9 +10,13 @@
         android:label="MT 2026 APP"
         android:roundIcon="@mipmap/scooby_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MobileTechApp">
+        android:theme="@style/Theme.MobileTechApp"
+        tools:targetAPI="31">
         <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

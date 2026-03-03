@@ -19,11 +19,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+        Bundle extras = getIntent().getExtras();
+        String msg = extras.getString("message");
+        TextView textView = findViewById(R.id.textViewOutput);
+        textView.setText(msg);
     }
 
     public void displayMessage(View view) {
         final TextView textView = (TextView) findViewById(R.id.textViewOutput);
-        EditText editText = (EditText) findViewById(R.id.inputText);
+        EditText editText = (EditText) findViewById(R.id.editTextInput);
         if (editText.getText().length() == 0)
             textView.setText("Please enter a message");
         else
