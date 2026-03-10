@@ -25,11 +25,21 @@ public class StartActivity extends AppCompatActivity {
         });
 
         Button button = findViewById(R.id.buttonUIEvent);
+        Button locationButton = findViewById(R.id.locationServicesButton);
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(StartActivity.this, MainActivity.class);
                 intent.putExtra("message", "Hello World!");
+                startActivity(intent);
+            }
+        });
+
+        locationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StartActivity.this, LocationServicesActivity.class);
                 startActivity(intent);
             }
         });
