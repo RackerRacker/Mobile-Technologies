@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676222650220",
+    "project_id": "mobile-tech-aeb87",
+    "storage_bucket": "mobile-tech-aeb87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676222650220:android:37b87d0dc265fdb1d5d549",
+        "android_client_info": {
+          "package_name": "com.example.mobiletechapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZAw6_s2LOxwg0Z_Bc55_vCHoo8naIIcg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
