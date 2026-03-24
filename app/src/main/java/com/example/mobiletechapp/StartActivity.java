@@ -26,6 +26,7 @@ public class StartActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.buttonUIEvent);
         Button locationButton = findViewById(R.id.locationServicesButton);
+        Button firebaseMLKitButton = findViewById(R.id.firebaseMLKitButton);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +41,14 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(StartActivity.this, LocationServicesActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        firebaseMLKitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StartActivity.this, MLKitActivity.class);
                 startActivity(intent);
             }
         });
