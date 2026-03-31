@@ -1,12 +1,17 @@
 package com.example.mobiletechapp;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,16 +37,10 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.label.ImageLabel;
-import com.google.mlkit.vision.label.ImageLabeler;
-import com.google.mlkit.vision.label.ImageLabeling;
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MLKitActivity extends AppCompatActivity {
@@ -63,6 +62,14 @@ public class MLKitActivity extends AppCompatActivity {
         });
         imageView = findViewById(R.id.imageViewMLKit);
         textViewOutput = findViewById(R.id.textViewMLKit);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String result = extras.getString("result");
+            textViewOutput.setText(result);
+            Uri uri = Uri.parse(extras.getString("uri"));
+            imageView.setImageURI(uri);
+        }
     }
 
     private boolean checkPermission() {
@@ -111,40 +118,33 @@ public class MLKitActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
                                 if (image != null) {
-                                    processImageFromContentReader(image);
-                                    processImageFromTextReader(image);
+                                    processImageFromBarcodeReader(image);
                                 }
                             }
                         }
                     });
 
-    public void processImageFromContentReader(InputImage image) {
-        ImageLabeler labeler = ImageLabeling.getClient(
-                ImageLabelerOptions.DEFAULT_OPTIONS);
-        labeler.process(image)
-                .addOnSuccessListener(
-                        new OnSuccessListener<List<ImageLabel>>() {
-                            @Override
-                            public void onSuccess(List<ImageLabel> labels) {
-                                if (labels.size() == 0) {
-                                    textViewOutput.append("Nothing found in the image\n");
-                                    return;
-                                }
-                                textViewOutput.append(Html.fromHtml("<font color='navy'>" +
-                                                "<b>Detected image content:</b></font><br>",
-                                Html.FROM_HTML_MODE_LEGACY));
-                                int counter = 1;
-                                for (ImageLabel label : labels) {
-                                    String result = label.getText();
-                                    float confidence = label.getConfidence();
-                                    textViewOutput.append(" " +
-                                            counter + ". " + result +
-                                            " (" + String.format("%.1f", confidence * 100.0f) +
-                                            "% confidence)\n");
-                                    counter++;
-                                }
-                            }
-                        })
+    public void processImageFromBarcodeReader (InputImage image) {
+        BarcodeScannerOptions options =
+                new BarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS).build();
+        BarcodeScanner scanner = BarcodeScanning.getClient(options);
+        Task<List<Barcode>> result = scanner.process(image)
+                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                    @Override
+                    public void onSuccess(List<Barcode> barcodes) {
+                        textViewOutput.append(Html.fromHtml("<font color='navy'>" +
+                                "<b>Detected barcode:</b></font><br>", Html.FROM_HTML_MODE_LEGACY));
+                        String result = "";
+                        for (Barcode barcode : barcodes) {
+                            result = barcode.getRawValue();
+                            textViewOutput.append(result + "\n");
+                        }
+                        if (result.length() < 2) {
+                            textViewOutput.append(" Barcode not found.\n");
+                        }
+                    }
+                })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -153,32 +153,53 @@ public class MLKitActivity extends AppCompatActivity {
                 });
     }
 
-    public void processImageFromTextReader(InputImage image) {
-        TextRecognizer recognizer =
-                TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-        Task<Text> result =
-                recognizer.process(image)
-                        .addOnSuccessListener(new OnSuccessListener<Text>() {
-                            @Override
-                            public void onSuccess(Text visionText) {
-                                textViewOutput.append(Html.fromHtml("<font color='navy'>" +
-                                        "<b>Detected text:</b></font><br>", Html.FROM_HTML_MODE_LEGACY));
-// Task completed successfully
-                                String result = visionText.getText();
-                                if (result.length() > 1)
-                                    textViewOutput.append(" " + result + "\n");
-                                else
-                                    textViewOutput.append(" No text found.\n");
-                            }
-                        })
-                        .addOnFailureListener(
-                                new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-// Task failed with an exception
-                                        textViewOutput.setText("Failed");
-                                    }
-                                });
+    public void openListView(View view) {
+        // Get image from the current imageFileUri
+        Bitmap bitmap = getBitmapFromUri(imageFileUri);
+        // Create a unique filename from the current date time
+        String currentDateTime = LocalDateTime.now().toString();
+        String imageFilename = currentDateTime.replaceAll("\\D+", "");
+        // Save the image to gallery with the unique filename
+        saveImageToGallery(bitmap, imageFilename, MLKitActivity.this);
+        // open List View activity
+        Intent intent = new Intent(MLKitActivity.this, ListViewActivity.class);
+        intent.putExtra("reader", "Barcode Reader");
+        intent.putExtra("result", textViewOutput.getText().toString());
+        intent.putExtra("filename", imageFilename);
+        startActivity(intent);
+    }
+
+    private Bitmap getBitmapFromUri(Uri uri) {
+        try {
+            ImageDecoder.Source source =
+                    ImageDecoder.createSource(getContentResolver(), uri);
+            Bitmap bitmap = ImageDecoder.decodeBitmap(source);
+            return bitmap;
+        } catch (IOException e) {
+            Log.e("URI_TO_BITMAP", "Failed to load image", e);
+            return null;
+        }
+    }
+    private void saveImageToGallery(Bitmap bitmap, String fileName, Context
+            context) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES);
+        Uri imageUri =
+                context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        try {
+            OutputStream outputStream =
+                    context.getContentResolver().openOutputStream(imageUri);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            Log.d("SAVE_GALLERY", "Image saved to gallery: " +
+                    imageUri.toString());
+        } catch (IOException e) {
+            Log.e("SAVE_GALLERY", "Error saving image", e);
+        }
     }
 
 }

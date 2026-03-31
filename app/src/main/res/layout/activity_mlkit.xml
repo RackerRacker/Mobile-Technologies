@@ -61,4 +61,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/openCameraButton" />
+
+    <Button
+        android:id="@+id/openListViewBttn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="100dp"
+        android:autoSizeMaxTextSize="16sp"
+        android:onClick="openListView"
+        android:text="Open List View"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadImageButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>
