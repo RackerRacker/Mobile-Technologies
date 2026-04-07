@@ -27,6 +27,9 @@ public class StartActivity extends AppCompatActivity {
         Button button = findViewById(R.id.buttonUIEvent);
         Button locationButton = findViewById(R.id.locationServicesButton);
         Button firebaseMLKitButton = findViewById(R.id.firebaseMLKitButton);
+        Button sqliteButton = findViewById(R.id.sqlite_button);
+        Button animationButton = findViewById(R.id.animationButton);
+        Button multimediaButton = findViewById(R.id.multimediaButton);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,6 +52,31 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(StartActivity.this, MLKitActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        sqliteButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StartActivity.this, SQLiteActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        animationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StartActivity.this, AnimationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        multimediaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(StartActivity.this, MultimediaActivity.class);
                 startActivity(intent);
             }
         });

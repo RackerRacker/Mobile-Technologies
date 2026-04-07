@@ -21,6 +21,15 @@
         android:theme="@style/Theme.MobileTechApp"
         tools:targetAPI="31">
         <activity
+            android:name=".MultimediaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AnimationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SQLiteActivity"
+            android:exported="false" />
+        <activity
             android:name=".ListViewActivity"
             android:exported="false" />
         <activity
